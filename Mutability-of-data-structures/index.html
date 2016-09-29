@@ -1,0 +1,697 @@
+<html>
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+  <!--This one seems to work all the time, but really small on ipad-->
+  <!--<meta name="viewport" content="initial-scale=0.4">-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" media="all" href="theme/css/default.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css">
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+  <script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+</head>
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+    <aside class="gdbar"><img src="images/kaleidos-logo.png"></aside>
+    <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+    </hgroup>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>C and the struct</h2>
+      <h3>Free access to anybody!</h3>
+    </hgroup>
+    <article class="smaller">
+      <p>Suppose we have a data structure with a constraint.</p>
+      <pre class="prettyprint" data-lang="c">
+typedef struct {
+    unsigned int counter; // this should always be &gt; 0
+    //...
+} some_thing;
+
+some_thing s;
+s.counter = 1;
+      </pre>
+      <p>But anyone, anywhere, can read or write the counter.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>C and the struct</h2>
+      <h3>Free access to anybody!</h3>
+    </hgroup>
+    <article class="smaller">
+      <p>You can write an invalid value, no check.</p>
+      <pre class="prettyprint" data-lang="c">
+s.counter = 0; // WTF
+// --&gt; success
+printf("%d\n", s.counter);
+// --&gt; 0
+      </pre>
+      <pre class="prettyprint" data-lang="c">
+void some_function(some_thing s) {
+    // code that explodes your computer if s.counter == 0
+}
+      </pre>
+      <p>How do you trust that counter is never zero?</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>C and the struct</h2>
+      <h3>Free access to anybody!</h3>
+    </hgroup>
+    <article class="smaller">
+      <p>You can always add an "if"...</p>
+      <pre class="prettyprint" data-lang="c">
+void some_function(some_thing s) {
+    if (s.counter &gt;= 1) {
+        // safe here
+    } else {
+        // but what we do put here????
+    }
+}
+      </pre>
+      <p>We have no context information to do something useful there.</p>
+      <p>Only can ignore it (with unexpected consequences later) or return an error code or a
+      similar and complex error management system, for a condition that should never occur.</p>
+      <p>If the code is correct, it will never call the function with a zero counter. You should
+      not hunt for bugs at runtime! You have your test suite for that!</p>
+    </article>
+  </slide>
+
+  <slide class="segue dark">
+    <hgroup class="auto-fadein">
+      <h2>Stop!</h2>
+      <h3>Here comes Object Orientation</h2>
+      <h3>With its awesome "encapsulation"</h3>
+      <p>&nbsp;</p>
+    </hgroup>
+  </slide>
+
+  <slide class="segue dark">
+    <hgroup>
+      <h2>Stop!</h2>
+      <h3>Here comes Object Orientation</h2>
+      <h3>With its awesome "encapsulation"</h3>
+      <p>...but then, it was C++</p>
+    </hgroup>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>C++ classes</h2>
+      <h3>Encapsulation in the wrong way</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="c++">
+class some_thing {
+    public:
+        unsigned int counter1 = 1;
+    private:
+        unsigned int counter2 = 1;
+    //...
+}
+
+some_thing s;
+      </pre>
+      <p>Trying to restrict access with public and private.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>C++ classes</h2>
+      <h3>Encapsulation in the wrong way</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="c++">
+cout &lt;&lt; s.counter1;
+// --&gt; 1
+
+s.counter1 = 0; // WTF
+// --&gt; success
+
+cout &lt;&lt; s.counter2; // WTF
+// --&gt; error
+
+s.counter2 = 0;
+// --&gt; error
+      </pre>
+      <p>If public, same problem as in C.</p>
+      <p>if private, you can't write a bad value...  but you can't read good values, neither!</p>
+      <p><br/>Bad news are... all newer mainstream languages have inherited this mistake!</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The infamous Getters and Setters</h2>
+      <h3>Some kind of patch</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="java">
+class SomeThing {
+    private unsigned int counter = 1;
+
+    public int getCounter() {
+        return this.counter;
+    }
+
+    public setCounter(unsigned int value) {
+        if (value &gt;= 1) {
+            this.counter = value;
+        } else {
+            // what do we put here???
+        }
+    }
+}
+
+SomeThing s = new SomeThing();
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The infamous Getters and Setters</h2>
+      <h3>Some kind of patch</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="java">
+System.out.println(s.getCounter());
+// --&gt; 1
+
+s.setCounter(0);
+// --&gt; runtime error??
+
+void some_function(SomeThing s) {
+    // safe here
+}
+      </pre>
+      <p>A bit safer, but</p>
+      <ul>
+        <li>Lots of ugly boilerplate code, just to add a little fucking counter.</li>
+        <li>You now need to call a function to read the value.</li>
+        <li>And we still have the lack of context and the innecesary runtime check.</li>
+      </ul>
+      <p>We have just moved the problem to another place.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Properties, the great solution!</h2>
+      <h3>...or not?</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="python">
+class SomeThing:
+
+    def __init__(self):
+        self._counter = 1
+
+    @property
+    def counter(self):
+        return self._counter
+
+    @counter.setter
+    def counter(self, value):
+        if value &gt;= 1:
+            self._counter = value
+        else:
+            # do nasty runtime things
+
+s = SomeThing()
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Properties, the great solution!</h2>
+      <h3>...or not?</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="python">
+print(s.counter)
+# --&gt; 1
+
+s.counter = 0
+# --&gt; error
+      </pre>
+      <pre class="prettyprint" data-lang="python">
+def some_function(s):
+    # safe here
+      </pre>
+      <p>Same problems as with getters &amp; setters, but with even more code.</p>
+      <p>Only (advantage?) is the syntactic sugar of disguishing a method call as direct attribute access.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The immutable approach</h2>
+      <h3>Immutability is just another way of do mutations</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="clojure">
+(defrecord SomeThing [counter ...])  // counter should always be &gt;= 1
+
+(def s (SomeThing. 1 ...))
+
+(:counter s)
+;;--&gt; 1
+
+(def s2 (assoc s :counter 0)) // WTF
+;;--&gt; success
+
+(defn some_function [s]
+    (if s.counter &gt;= 1
+        (...)
+        (...) ;; do nasty runtime things))
+      </pre>
+      <p>If not handled with care, we are back into the plain old problem!</p>
+    </article>
+  </slide>
+
+  <slide class="segue dark">
+    <hgroup class="auto-fadein">
+      <h2>And now</h2>
+      <h3>for something completely different</h3>
+      <p>&nbsp;</p>
+    </hgroup>
+  </slide>
+
+  <slide class="segue dark">
+    <hgroup>
+      <h2>And now</h2>
+      <h3>for something completely different</h3>
+      <p>Abstract Data Types</p>
+    </hgroup>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Abstract Data Types</h2>
+      <h3>Make impossible to have an invalid value</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="eiffel">
+class SOME_THING
+
+feature {ANY}  -- all the following features are public (visible to any)
+
+    counter: Integer = 1
+
+    reset_counter
+        do
+            counter := 1
+        end
+
+    inc_counter
+        do
+            counter := counter + 1
+        end
+
+s: SOME_THING
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Abstract Data Types</h2>
+      <h3>Make impossible to have an invalid value</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="eiffel">
+print s.counter
+-- &gt; 1
+
+s.counter = 2
+-- &gt; syntax error (at <b>compile</b> time)
+
+s.counter = 0
+-- &gt; syntax error (at <b>compile</b> time)
+
+some_function(s: SOME_THING)
+    do
+        -- safe here
+    end
+      </pre>
+      <p>No runtime checks, can guarantee program is safe by inspecting
+      only the ADT functions.</p>
+      <p>The key: <b>read & write are not symmetric</b>.<br />
+      Nobody should be able to write to a public attribute from the outside.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Uniform access</h2>
+      <h3>Achieved without properties extra code</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="eiffel">
+class SOME_THING
+
+feature {ANY} -- public
+    counter: Integer is
+        do
+            Result := array.length
+        end
+    reset_counter
+        do
+            array.clear
+        end
+    inc_counter
+        do
+            array.append(DATE.now)
+        end
+
+feature {NONE} -- private
+    array: ARRAY(Integer)
+      </pre>
+      <p>Usage is exactly the same as when <code>counter</code> is a public property.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>ADTs are not only for classes</h2>
+      <h3>There exist other structures</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="clojure">
+(defprotocol SomeThingProtocol
+    (reset_counter [s])
+    (inc_counter [s]))
+
+(defrecord SomeThing [counter ...]  // counter should always be &gt;= 1
+    SomeThingProtocol
+    (reset_counter [s] (assoc s :counter 1))
+    (inc_counter [s] (assoc s (inc (:counter s)))))
+
+(defn make_some_thing []
+    (SomeThing. 1 ...))
+
+(def s make_some_thing)
+(:counter s)
+;;--&gt; 1
+
+(def s2 (inc_counter s))
+(:counter s2)
+;;--&gt; 2
+
+(defn some_function [s]
+    // safe here if you always access SomeThing through the protocol
+)
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>ADTs in Python</h2>
+      <h3>Featuring... python_adt library</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="shell">
+$ pip install python_adt
+      </pre>
+      <pre class="prettyprint" data-lang="python">
+import adt
+
+class SomeThing(adt.ADT):
+    counter = adt.IntField(default = 1)
+
+    def reset_counter(self):
+        self.counter = 1
+
+    def inc_counter(self):
+        self.counter += 1
+      </pre>
+      <p>An ADT is a normal Python class... with some magic.<p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>ADTs in Python</h2>
+      <h3>Featuring... python_adt library</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="python">
+s = SomeThing()
+
+print(s.counter)
+-- &gt; 1
+
+s.counter = 2
+-- &gt; exception
+
+def some_function(s):
+    # safe here
+      </pre>
+      <p>A python ADT class has a magic __init__ method that initializes attributes, and make some type,
+      default and null checks (quite like Django models, but without the persistence system).</p>
+      <p>It also disallow modifying attributes from outside the class methods.</p>
+      <p>Otherwise, it behaves like any normal class, with no performance impact in production code.</p>
+    </article>
+  </slide>
+
+  <slide class="segue dark">
+    <hgroup class="auto-fadein">
+      <h2>But</h2>
+      <h3>ADTs are some times not enough</h3>
+      <p>&nbsp;</p>
+    </hgroup>
+  </slide>
+
+  <slide class="segue dark">
+    <hgroup>
+      <h2>But</h2>
+      <h3>ADTs are some times not enough</h3>
+      <p>The need for Design by Contract</p>
+    </hgroup>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>ADT methods</h2>
+      <h3>How to check the input of your abstract operations?</h3>
+    </hgroup>
+    <article class="smaller">
+      <p>Let's suppose we need to allow the user to specify the counter increment.</p>
+      <pre class="prettyprint" data-lang="python">
+import adt
+
+class SomeThing(adt.ADT):
+    counter = adt.IntField(default = 1)
+
+    def reset_counter(self):
+        self.counter = 1
+
+    def inc_counter(self, increment = 1):
+        self.counter += 1
+
+s = SomeThing()
+
+s.inc_counter(-1) # argh!
+      </pre>
+      <p>If we add an 'if' inside the method, we still have the lack of context problem.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Establishing a contract</h2>
+      <h3>If you don't f**k me, I don't f**k you</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="python">
+import adt
+
+class SomeThing(adt.ADT):
+    counter = adt.IntField(default = 1)
+
+    def reset_counter(self):
+        self.counter = 1
+
+    def inc_counter(self, increment = 1):
+        """
+        require:
+            increment &gt; 0
+        """
+        self.counter += 1
+      </pre>
+      <p>The responsability of enforcing "requirements" belongs <b>to the caller</b>.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Establishing a contract</h2>
+      <h3>If you don't f**k me, I don't f**k you</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="python">
+increment = 10
+s.inc_counter(increment) # Safe here, because 10 is &gt; 0
+      </pre>
+      <pre class="prettyprint" data-lang="python">
+try:
+    increment = int(input("Type some increment: "))
+except ValueError:
+    increment = 0
+if increment &lt;= 0:
+    print("You should write a number &gt; 0") # here you do know what to do with an invalid value
+else:
+    s.inc_counter(increment)
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Debugging the contract</h2>
+      <h3>Featuring... pydbc library</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="shell">
+$ pip install pydbc
+      </pre>
+      <pre class="prettyprint" data-lang="python">
+import pydbc
+
+class SomeThing(adt.ADT):
+    ...
+    def inc_counter(self, increment = 1):
+        """
+        require:
+            increment &gt; 0
+        """
+        self.counter += 1
+      </pre>
+      <p>The pydbc library adds magic code to check contract clauses at every function
+      entry and exit.<p>
+      <p>When all tests pass, so your can ensure that code never breaks contracts in
+      any execution path, you can disable the checks for production code.</p>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The complete contract</h2>
+      <h3>Preconditions, postconditions and invariants</h3>
+    </hgroup>
+    <article class="smaller">
+      <pre class="prettyprint" data-lang="python">
+class SomeThing(adt.ADT):
+    """
+    invariant:
+        self.counter &gt;= 1
+    """
+    counter = adt.IntField(default = 1)
+
+    def reset_counter(self):
+        """
+        ensure:
+            self.counter == 1   # perhaps a too obvious postcondition
+        """
+        self.counter = 1
+
+    def inc_counter(self, increment = 1):
+        """
+        require:
+            increment &gt; 0
+        """
+        self.counter += 1
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Practical DBC usage</h2>
+      <h3>Using contracts in real code withouth going crazy</h3>
+    </hgroup>
+    <article class="smaller">
+      <ul>
+        <li>Clauses may serve as documentation and to reduce the number of
+          assertions in unit tests.<br /><br /></li>
+        <li>Only check properties internal to the data structure.<br /><br /></li>
+        <li>Don't try to add contracts to every function (formal code verification is still not mature).</li>
+        <ul>
+          <li>Checks for null and empty values are best made with ADT
+            field parameters.</li>
+          <li>Too obvious postconditions are perhaps unnecesary (e.g.
+            the "self.counter == 1" example).</li>
+          <li>If a clause is so complex that its longer that the function itself,
+            better check it with unit tests.<br /><br /></li>
+        </ul>
+        <li>Move all your validation code to "boundary" modules, that interact
+          with the outside, and have all your data structures always correct
+          while they travel your internal code.<br /><br /></li>
+        <li>As always, try to have your modules and functions small
+          and focused in only one thing.</li>
+      </ul>
+      <p><center><br />See a real example in <a href="http://github.com/piweek/piweekr">http://git.com/piweek/piweekr</a></center></p>
+    </article>
+  </slide>
+
+  <slide class="segue dark nobackground">
+    <aside class="gdbar"><img src="images/kaleidos-logo.png"></aside>
+    <hgroup class="auto-fadein">
+      <h2>Let's fight!</h2>
+      <h3>Questions? Doubts? Suggestions? Flames?</h3>
+    </hgroup>
+  </slide>
+
+  <slide class="thank-you-slide segue nobackground">
+    <aside class="gdbar right"><img src="images/kaleidos-logo.png"></aside>
+    <article class="flexbox vleft auto-fadein">
+      <h2>&lt;Thank You!&gt;</h2>
+      <p>You can reach me at</p>
+    </article>
+    <p class="auto-fadein" data-config-contact>
+      <!-- populated from slide_config.json -->
+    </p>
+  </slide>
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<script>
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-XXXXXXXX-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+<!--[if IE]>
+  <script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+  <script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body>
+</html>

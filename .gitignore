@@ -1,0 +1,6 @@
+# File backups and locks
+*.swp
+*.swo
+*~
+.~lock.*
+
