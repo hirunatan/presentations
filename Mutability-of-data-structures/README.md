@@ -1,6 +1,8 @@
-## A speak about data integrity using Abstract Data Types and Design By Contract
+## A speak about data integrity
+Using Abstract Data Types and Design By Contract:
+https://en.wikipedia.org/wiki/Abstract_data_type
+https://en.wikipedia.org/wiki/Design_by_contract
 
-Presentation made with [`https://code.google.com/archive/p/io-2012-slides/`](Google IO 2012 slides).
-You can view it directly from this repo, going to [`https://hirunatan.github.io/presentations/Mutability-of-data-structures/index.html`]
-(https://hirunatan.github.io/presentations/Mutability-of-data-structures/index.html).
+Presentation made with [`Google IO 2012 slides`](https://code.google.com/archive/p/io-2012-slides/).
+You can view it directly from this repo, going to https://hirunatan.github.io/presentations/Mutability-of-data-structures/index.html.
 
