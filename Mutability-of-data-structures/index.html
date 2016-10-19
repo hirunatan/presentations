@@ -265,7 +265,7 @@ def some_function(s):
   <slide>
     <hgroup>
       <h2>The immutable approach</h2>
-      <h3>Immutability is just another way of do mutations</h3>
+      <h3>Immutability does not mean that data does not change!</h3>
     </hgroup>
     <article class="smaller">
       <pre class="prettyprint" data-lang="clojure">
@@ -507,7 +507,7 @@ class SomeThing(adt.ADT):
         self.counter = 1
 
     def inc_counter(self, increment = 1):
-        self.counter += 1
+        self.counter += increment
 
 s = SomeThing()
 
@@ -537,7 +537,7 @@ class SomeThing(adt.ADT):
         require:
             increment &gt; 0
         """
-        self.counter += 1
+        self.counter += increment
       </pre>
       <p>The responsability of enforcing "requirements" belongs <b>to the caller</b>.</p>
     </article>
@@ -627,6 +627,27 @@ class SomeThing(adt.ADT):
 
   <slide>
     <hgroup>
+      <h2>The complete contract</h2>
+      <h3>Preconditions, postconditions and invariants</h3>
+    </hgroup>
+    <article class="smaller">
+      <ul>
+        <li><b>Preconditions</b> are the clauses that we had been talking about.<br /><br /></li>
+        <li><b>Postconditions </b>are useful to know if the data changed by a function is safe to use,
+            or to pass to other function that has a precondition.<br /><br /></li>
+        <li><b>Invariants </b>are like postconditions that are attached to every method of a class
+            (clauses that must be true after any method is executed).<br /><br /></li>
+        <li>Same effects may be obtained in many languages by placing "assert" instructions
+            at the beginning or ending of the functions (but this way you have the clauses intermixed
+            with the code, instead of in a separated place, and can't define invariants).<br /><br /></li>
+        <li>Several languages incorpore contract clauses in the language syntax. But many of them
+            have no invariants, too.<br /><br /></li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
       <h2>Practical DBC usage</h2>
       <h3>Using contracts in real code withouth going crazy</h3>
     </hgroup>
@@ -650,7 +671,7 @@ class SomeThing(adt.ADT):
         <li>As always, try to have your modules and functions small
           and focused in only one thing.</li>
       </ul>
-      <p><center><br />See a real example in <a href="http://github.com/piweek/piweekr">http://git.com/piweek/piweekr</a></center></p>
+      <p><center><br />See a real example in <a href="https://github.com/PIWEEK/piweekr-back">https://github.com/PIWEEK/piweekr-back</a></center></p>
     </article>
   </slide>
 
